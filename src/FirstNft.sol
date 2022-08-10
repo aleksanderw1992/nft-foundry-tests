@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.4;
+pragma solidity ^0.8.13;
 
 import "openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
@@ -20,24 +20,24 @@ contract FirstNft is ERC721Enumerable, ERC721URIStorage {
     }
     
     /**
-    * owner - allows to mint token for other user than msg.sender
+    * mint one token for msg.sender
     */
-    function mint(address owner) public payable {
-        mint(owner, uint8(1));
+    function mint() public payable {
+        mint(uint8(1));
     }
 
     /**
-    * owner - allows to mint token for other user than msg.sender
+    * mints amount tokens for msg.sender
     */
-    function mint(address owner, uint8 amount) public payable {
+    function mint(uint8 amount) public payable {
         require(amount > 0 && amount <= 5, "You can mint at most 5 NFTs in single transaction");
-        require(_counter.current() < MAX_SUPPLY - amount, "Total nft supply cannot exceed 100");
+        require(_counter.current() + amount <= MAX_SUPPLY , "Total nft supply cannot exceed 100");
         require(msg.value >= MIN_MINT_PRICE * amount, "You need to pay at least 0.01 ETH for each NFT to mint");
 
         for (uint i; i < amount; i++) {
             _counter.increment();
             uint256 newItemId = _counter.current();
-            _mint(owner, newItemId);
+            _mint(msg.sender, newItemId);
             _setTokenURI(newItemId, IMG_URL);
         }
     }
@@ -49,6 +49,10 @@ contract FirstNft is ERC721Enumerable, ERC721URIStorage {
     modifier onlyOwner() {
         require(msg.sender == owner, "Only owner can withdraw funds");
         _;
+    }
+    
+    function totalSupply() public view override(ERC721Enumerable) returns (uint256) {
+        return _counter.current();
     }
 
     // overriden for inheritance solidity
