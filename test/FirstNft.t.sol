@@ -22,7 +22,7 @@ contract FirstNftTest is Test {
             contractUnderTests.mint{value:ETH_MIN_PRICE }();
 //            console.log(string.concat(Strings.toString(contractUnderTests.totalSupply()), " ", Strings.toString(i)));
         }
-        assertEq(100, contractUnderTests.totalSupply());
+        assertEq(contractUnderTests.totalSupply(), 100);
     }
     
     function testCannotMintMoreThan100() public {
@@ -61,5 +61,30 @@ contract FirstNftTest is Test {
         vm.prank(someAddress);
         contractUnderTests.withdraw();
     }
+    
+    function testBalancesChangeAfterWithdraw() public {
+        vm.deal(owner, 1 ether);
+        vm.deal(someAddress, 1 ether);
+        
+        // testing preconditions
+        assertEq(address(contractUnderTests).balance, 0);
+        assertEq(owner.balance, 1 ether);
+        assertEq(someAddress.balance, 1 ether);
+        
+        // minting
+        vm.prank(someAddress);
+        contractUnderTests.mint{value:0.5 ether}(3);
+    
+        assertEq(address(contractUnderTests).balance, 0.5 ether);
+        assertEq(owner.balance, 1 ether);
+        assertEq(someAddress.balance, 0.5 ether);
 
+        // withdrawing
+        vm.prank(owner);
+        contractUnderTests.withdraw();
+    
+        assertEq(address(contractUnderTests).balance, 0);
+        assertEq(owner.balance, 1.5 ether);
+        assertEq(someAddress.balance, 0.5 ether);
+    }
 }
