@@ -5,14 +5,16 @@ import "forge-std/Test.sol";
 import "../src/FirstNft.sol";
 
 contract FirstNftTest is Test {
-    FirstNft contractUnderTests = new FirstNft();
-    address someAdd = address(0x01);
+    FirstNft contractUnderTests;
     uint256 ETH_MIN_PRICE = 0.01 ether;
     uint256 ETH_NOT_SUFFICIENT_PRICE = 0.009 ether;
-    address public owner;
+    address owner = address(0x1223);
+    address someAddress = address(0x1889);
     
     function setUp() public {
-        owner = address(this);
+        vm.startPrank(owner);
+        contractUnderTests = new FirstNft();
+        vm.stopPrank();
     }
 
     function testMint100() public {
@@ -47,4 +49,17 @@ contract FirstNftTest is Test {
         }
     }
     
+    function testOwnerCanWithdraw() public {
+        contractUnderTests.mint{value:ETH_MIN_PRICE}();
+        vm.prank(owner);
+        contractUnderTests.withdraw();
+    }
+    
+    function testNotOwnerCannotWithdraw() public {
+        contractUnderTests.mint{value:ETH_MIN_PRICE}();
+        vm.expectRevert("Only owner can withdraw funds");
+        vm.prank(someAddress);
+        contractUnderTests.withdraw();
+    }
+
 }
