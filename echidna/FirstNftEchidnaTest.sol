@@ -6,7 +6,7 @@ import "../src/FirstNft.sol";
 contract FirstNftEchidnaTest {
     FirstNft private contractUnderTests = new FirstNft();
     
-    function totalSupplyDoNotExceed100() public returns (bool) {
+    function echidna_totalSupplyDoNotExceed100() public returns (bool) {
         return contractUnderTests.totalSupply() >= 0 && contractUnderTests.totalSupply() <= 100;
     }
 }
